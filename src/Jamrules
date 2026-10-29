@@ -3426,6 +3426,12 @@
 
 			SSLLIB    ?= [ FDirName $(SSLLIBDIR) libssl.a    ] ;
 			CRYPTOLIB ?= [ FDirName $(SSLLIBDIR) libcrypto.a ] ;
+
+			local e1 = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+
+			OnTargetVarPrepend $(e1) : LINKLIBS : /usr/lib/x86_64-linux-gnu/libz.a ;
+			OnTargetVarPrepend $(e1) : LINKLIBS : /usr/lib/x86_64-linux-gnu/libzstd.a ;
+			OnTargetVarPrepend $(e1) : LINKLIBS : /usr/lib/x86_64-linux-gnu/libjitterentropy.a ;
 		}
 
 		local e = [ FAppendSuffix $(<) : $(SUFEXE) ] ;

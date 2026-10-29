@@ -1,0 +1,49 @@
+***What is being built***
+
+The source can be used to build two components:
+- `p4` CLI binary itself
+- `Perforce API` 
+
+Both components require OpenSSL (3.x). Depending on how you obtain OpenSSL build (from external source or locally) you may run into additional dependencies at some point.
+
+***Linux***
+
+Tested on WSL/Ubuntu 26.04
+
+== Preparations ==
+
+1. Get `jam`:
+- `sudo apt update`
+- `sudo apt install jam`
+
+2. Install compiler tools
+- `sudo apt install -y build-essential`
+
+3. Enable Linux file metadata in WSL
+- Open `/etc/wsl.conf` and add
+```
+[automount]
+options = "metadata"
+```
+- Restart WSL
+
+4. Get OpenSSL
+- `sudo apt-get install libssl-dev`
+
+Current version as of writing this is `3.5.5-1ubuntu3.7` (`apt-cache show libssl-dev`)
+
+== To build `Perforce API`
+
+1. Run `jam -sOSVER=26 -sGCCVER=11.4.0 -sSMARTHEAP=0 -sTYPE=pic -sMALLOC_OVERRIDE=0 -sUSE_EXTENSIONS=0 -sSSLLIBDIR=/usr/lib/x86_64-linux-gnu/ -sSSLINCDIR=/usr/include/ -sPRODUCTION=1 p4api.tar` (for Release build)
+
+== To build `P4 CLI`
+
+1. Install additional link-time dependencies
+
+As of writing, the version obtained using `sudo apt-get install libssl-dev` (`3.5.5-1ubuntu3.7` - OpenSSL 3+ with compression) depends on:
+- sudo apt install -y libjitterentropy3-dev
+- sudo apt install -y libzstd-dev
+- sudo apt install -y zlib1g-dev
+
+2. Run `jam -sOSVER=26 -sGCCVER=11.4.0 -sSMARTHEAP=0 -sTYPE=pic -sMALLOC_OVERRIDE=0 -sUSE_EXTENSIONS=0 -sSSLLIBDIR=/usr/lib/x86_64-linux-gnu/ -sSSLINCDIR=/usr/include/ p4` (for Release build)
+
