@@ -61,6 +61,7 @@ P4Api p4api :
 	errorlog.h
 	errornum.h
 	filesys.h
+	gzip.h
 	handler.h
 	hostenv.h
 	i18napi.h
