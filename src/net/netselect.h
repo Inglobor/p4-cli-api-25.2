@@ -39,7 +39,10 @@
 # if defined( OS_HPUX11 ) || defined( OS_NT )
 # define USE_SELECT_FDSET
 # else
-# define USE_SELECT_BITARRAY
+// # define USE_SELECT_BITARRAY
+# include <poll.h>
+
+# define USE_POLL
 # endif
 
 # define USE_SELECTOR
@@ -50,7 +53,7 @@
 class NetTcpSelector
 {
 
-    public:
+	public:
 
 # ifdef USE_SELECT_BITARRAY
 
@@ -114,6 +117,31 @@ class NetTcpSelector
 
 # endif
 
+# ifdef USE_POLL
+
+	NetTcpSelector( int t )
+	{
+		m_PollFd.fd = t;
+		m_PollFd.events = 0;
+		m_PollFd.revents = 0;
+	}
+
+	~NetTcpSelector()
+	{
+	}
+
+	void SetRead() { m_PollFd.events |= POLLIN; }
+	void ClearRead() { m_PollFd.events &= ~POLLIN; }
+	int CheckRead() { return ((m_PollFd.revents & POLLIN) != 0); }
+
+	void SetWrite() { m_PollFd.events |= POLLOUT; }
+	void ClearWrite() { m_PollFd.events &= ~POLLOUT; }
+	int CheckWrite() { return ((m_PollFd.revents & POLLOUT) != 0); }
+
+	pollfd m_PollFd = { 0 };
+
+# endif
+
 # ifdef USE_SELECTOR
 
 	/* Select() that works with BitArray or fd_set */
@@ -122,27 +150,39 @@ class NetTcpSelector
 	{
 	    for( ;; )
 	    {
-	        struct timeval tv;
-
 	        if( read ) SetRead(); else ClearRead();
 	        if( write ) SetWrite(); else ClearWrite();
+			
+#ifdef USE_POLL
+			int result = poll(&m_PollFd, 1, msec);
+#else
+	        struct timeval tv;
 
-		if( msec < 1000 )
-		{
-		    tv.tv_sec = 0;
-		    tv.tv_usec = msec * 1000;
-		}
-		else
-		{
-		    tv.tv_sec = msec / 1000;
-		    tv.tv_usec = ( msec % 1000 ) * 1000;
-		}
+			if( msec < 1000 )
+			{
+				tv.tv_sec = 0;
+				tv.tv_usec = msec * 1000;
+			}
+			else
+			{
+				tv.tv_sec = msec / 1000;
+				tv.tv_usec = ( msec % 1000 ) * 1000;
+			}
 
-	        switch( select( fd+1, Rfds(), Wfds(), 0, msec >= 0 ? &tv : 0 ) )
+			int result = select( fd+1, Rfds(), Wfds(), 0, msec >= 0 ? &tv : 0 );
+#endif
+			switch (result)
 	        {
 	        case -1:	
+#ifdef USE_POLL
+				fprintf(stderr, "Poll failed (netselect 1). FD: %d (0x%X). Err: %d (0x%X)", fd, fd, errno, errno);
+#else
+				fprintf(stderr, "Select failed (netselect 1). FD: %d (0x%X). Err: %d (0x%X)", fd, fd, errno, errno);
+#endif
+
 	            if( errno == EINTR )
 	                continue;
+
 		    return -1;
 
 	        case 0:	
