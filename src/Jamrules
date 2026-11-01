@@ -1,8 +1,8 @@
-/*
- * Original code Copyright (c) 2026 Perforce Software, Inc.
- * Modifications for OpenSSL compilability Copyright (c) 2026 Inglobor
- * SPDX-License-Identifier: BSD-2-Clause
- */
+#
+# Original code Copyright (c) 2026 Perforce Software, Inc.
+# Modifications for OpenSSL compilability Copyright (c) 2026 Inglobor
+# SPDX-License-Identifier: BSD-2-Clause
+#
 
 # p4/Jamrules
 #
