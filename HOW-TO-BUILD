@@ -32,11 +32,11 @@ options = "metadata"
 
 Current version as of writing this is `3.5.5-1ubuntu3.7` (`apt-cache show libssl-dev`)
 
-== To build `Perforce API`
+== To build `Perforce API` ==
 
 1. Run `jam -sOSVER=26 -sGCCVER=11.4.0 -sSMARTHEAP=0 -sTYPE=pic -sMALLOC_OVERRIDE=0 -sUSE_EXTENSIONS=0 -sSSLLIBDIR=/usr/lib/x86_64-linux-gnu/ -sSSLINCDIR=/usr/include/ -sPRODUCTION=1 p4api.tar` (for Release build)
 
-== To build `P4 CLI`
+== To build `P4 CLI` ==
 
 1. Install additional link-time dependencies
 
@@ -47,3 +47,42 @@ As of writing, the version obtained using `sudo apt-get install libssl-dev` (`3.
 
 2. Run `jam -sOSVER=26 -sGCCVER=11.4.0 -sSMARTHEAP=0 -sTYPE=pic -sMALLOC_OVERRIDE=0 -sUSE_EXTENSIONS=0 -sSSLLIBDIR=/usr/lib/x86_64-linux-gnu/ -sSSLINCDIR=/usr/include/ p4` (for Release build)
 
+***Mac***
+
+Tested on Mac 12.7
+
+== Preparations ==
+
+1. Get `command line developer tools` to get `git` etc. - start e.g. by running `git` in terminal
+
+2. Install `MacPorts` or `Homebrew`
+
+3. Install `jam`
+- Use `brew install jam` or `sudo port install jam` etc.
+
+4. Clone the repository - `git clone https://github.com/Inglobor/p4-cli-api-25.2.git code/`
+
+== Build universal OpenSSL libraries ==
+
+1. Clone OpenSSL repository - `git clone https://github.com/openssl/openssl.git ~/code/openssl`
+
+2. Go to OpenSSL folder, switch to desired version (`git checkout tags/openssl-3.5.9 -b build-3.5.9`)
+
+3. Configure OpenSSL Intel platform build (`./Configure darwin64-x86_64-cc --prefix=/tmp/openssl-x86 no-asm`) and build it (`make clean && make && make install`)
+
+4. Configure OpenSSL Apple platform build (`./Configure darwin64-arm64-cc --prefix=/tmp/openssl-arm no-asm`) and build it (`make clean && make && make install`)
+
+5. Merge both versions to universal build
+- `mkdir -p /tmp/openssl-universal/lib`
+- Merge `libcrypto` - `lipo -create /tmp/openssl-x86/lib/libcrypto.a /tmp/openssl-arm/lib/libcrypto.a -output /tmp/openssl-universal/lib/libcrypto.a`
+- Merge `libssl` - `lipo -create /tmp/openssl-x86/lib/libssl.a /tmp/openssl-arm/lib/libssl.a -output /tmp/openssl-universal/lib/libssl.a`
+- Copy includes - `cp -R /tmp/openssl-arm/include /tmp/openssl-universal/include`
+
+
+== To build `Perforce API` ==
+
+1. Run `jam -sOSVER=120 -sCLANGVER=14.0.0 -sTYPE=pic -sUSE_EXTENSIONS=0 -sOSPLAT=U -sPRODUCTION=1 -sSSLLIBDIR=/tmp/openssl-universal/lib/ -sSSLINCDIR=/tmp/openssl-universal/include/ p4api.tar` (for Release build)
+
+== To build `P4 CLI` ==
+
+1. Run `jam -sOSVER=120 -sCLANGVER=14.0.0 -sTYPE=pic -sUSE_EXTENSIONS=0 -sOSPLAT=U -sSSLLIBDIR=/tmp/openssl-universal/lib/ -sSSLINCDIR=/tmp/openssl-universal/include/ p4` (for Release build)
