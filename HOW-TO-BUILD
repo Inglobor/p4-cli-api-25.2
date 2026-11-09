@@ -30,6 +30,21 @@ options = "metadata"
 4. Get OpenSSL
 - `sudo apt-get install libssl-dev`
 
+* Build OpenSSL
+** `git clone https://github.com/openssl/openssl.git ~/code/openssl`
+** `cd ~/code/openssl/`
+** `git checkout tags/openssl-3.5.9 -b build-3.5.9`
+** `./Configure linux-x86_64 --prefix=/tmp/openssl-x86`
+** `make -j$(nproc)`
+** `make install_sw`
+
+* Build OpenSSL release package
+** `mkdir ~/code/openssl-package`
+** `cd ~/code/openssl-package`
+** `cp /tmp/openssl-x86/lib64/*.a .`
+** `tar -a -cf openssl_3.5.9-linux-x86_64.tar.gz *`
+
+
 Current version as of writing this is `3.5.5-1ubuntu3.7` (`apt-cache show libssl-dev`)
 
 == To build `Perforce API` ==
