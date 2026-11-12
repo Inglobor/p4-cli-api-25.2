@@ -101,3 +101,20 @@ Tested on Mac 12.7
 == To build `P4 CLI` ==
 
 1. Run `jam -sOSVER=120 -sCLANGVER=14.0.0 -sTYPE=pic -sUSE_EXTENSIONS=0 -sOSPLAT=U -sSSLLIBDIR=/tmp/openssl-universal/lib/ -sSSLINCDIR=/tmp/openssl-universal/include/ p4` (for Release build)
+
+== To build `Perforce API` ==
+
+1. Run `jam -sOSVER=26 -sGCCVER=11.4.0 -sSMARTHEAP=0 -sTYPE=pic -sMALLOC_OVERRIDE=0 -sUSE_EXTENSIONS=0 -sSSLLIBDIR=/usr/lib/x86_64-linux-gnu/ -sSSLINCDIR=/usr/include/ -sPRODUCTION=1 p4api.tar` (for Release build)
+
+***Windows***
+
+== To build `Perforce API` ==
+
+1. Run `jam -sMSVSVER=18 -sSMARTHEAP=0 -sTYPE=pic -sMALLOC_OVERRIDE=0 -sUSE_EXTENSIONS=0 -sUSE_WILDARGS=no -sSSLLIBDIR=/usr/lib/x86_64-linux-gnu/ -sSSLINCDIR="c:\code\OpenSSL\openssl\include" -sPRODUCTION=1 p4api.tar` (for Release build)
+
+== To build `P4 CLI` ==
+
+1. Build OpenSSL for Windows
+
+
+2. Run `jam -sMSVSVER=18 -sSMARTHEAP=0 -sTYPE=pic -sMALLOC_OVERRIDE=0 -sUSE_EXTENSIONS=0 -sUSE_WILDARGS=no -sSSLLIBDIR=c:\code\OpenSSL\openssl -sSSLINCDIR="c:\code\OpenSSL\openssl\include" p4` (for Release build)
