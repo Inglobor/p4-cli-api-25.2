@@ -1,7 +1,10 @@
 /*
- * Copyright 2009 Perforce Software.  All rights reserved.
+ * Original Copyright 2009 Perforce Software.  All rights reserved.
  *
  * This file is part of Perforce - the FAST SCM System.
+ * 
+ * Modifications to support socket handles beyond `1024` (select -> poll) Copyright (c) 2026 Inglobor
+ * SPDX-License-Identifier: BSD-2-Clause
  */
 
 /*

@@ -1,3 +1,9 @@
+#
+# Original Copyright (c) 2026 Perforce Software, Inc.
+# Modifications to expose compression features Copyright (c) 2026 Inglobor
+# SPDX-License-Identifier: BSD-2-Clause
+#
+
 SubDir P4 api ;
 
 SubDir $(P4) ;			# just for Jamrules
