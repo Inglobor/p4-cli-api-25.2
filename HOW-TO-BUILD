@@ -31,6 +31,10 @@ options = "metadata"
 ```
 - Restart WSL
 
+4. Get `git` if necessary
+
+5. Clone the repository - `git clone https://github.com/Inglobor/p4-cli-api-25.2.git ~/code/`
+
 ### To build `OpenSSL`
 
 1. Get OpenSSL source & switch to 3.5.9
@@ -81,11 +85,9 @@ options = "metadata"
 
 ## Mac
 
-# TODO: Continue here
-
 Tested on Mac 12.7
 
-== Preparations ==
+### Preparations
 
 1. Get `command line developer tools` to get `git` etc. - start e.g. by running `git` in terminal
 
@@ -94,50 +96,120 @@ Tested on Mac 12.7
 3. Install `jam`
 - Use `brew install jam` or `sudo port install jam` etc.
 
-4. Clone the repository - `git clone https://github.com/Inglobor/p4-cli-api-25.2.git code/`
+4. Clone the repository - `git clone https://github.com/Inglobor/p4-cli-api-25.2.git ~/code/`
 
-== Build universal OpenSSL libraries ==
+### To build `OpenSSL` (universal)
 
-1. Clone OpenSSL repository - `git clone https://github.com/openssl/openssl.git ~/code/openssl`
+1. Get OpenSSL source & switch to 3.5.9
+- `git clone https://github.com/openssl/openssl.git ~/code/openssl`
+- `cd ~/code/openssl/`
+- `git checkout tags/openssl-3.5.9 -b build-3.5.9`
 
-2. Go to OpenSSL folder, switch to desired version (`git checkout tags/openssl-3.5.9 -b build-3.5.9`)
+2. Configure OpenSSL Intel platform build (`./Configure darwin64-x86_64-cc --prefix=/tmp/openssl-x86 no-asm`) and build it (`make clean && make && make install`)
 
-3. Configure OpenSSL Intel platform build (`./Configure darwin64-x86_64-cc --prefix=/tmp/openssl-x86 no-asm`) and build it (`make clean && make && make install`)
+3. Configure OpenSSL Apple platform build (`./Configure darwin64-arm64-cc --prefix=/tmp/openssl-arm no-asm`) and build it (`make clean && make && make install`)
 
-4. Configure OpenSSL Apple platform build (`./Configure darwin64-arm64-cc --prefix=/tmp/openssl-arm no-asm`) and build it (`make clean && make && make install`)
-
-5. Merge both versions to universal build
+4. Merge both versions to universal build
 - `mkdir -p /tmp/openssl-universal/lib`
 - Merge `libcrypto` - `lipo -create /tmp/openssl-x86/lib/libcrypto.a /tmp/openssl-arm/lib/libcrypto.a -output /tmp/openssl-universal/lib/libcrypto.a`
 - Merge `libssl` - `lipo -create /tmp/openssl-x86/lib/libssl.a /tmp/openssl-arm/lib/libssl.a -output /tmp/openssl-universal/lib/libssl.a`
 - Copy includes - `cp -R /tmp/openssl-arm/include /tmp/openssl-universal/include`
 
+5. Create OpenSSL artifact for GitHub release
+- `cd /tmp/openssl-universal/`
+- `tar -a -cf openssl-3.5.9-static-macosx12u.tar.gz *`
 
-== To build `Perforce API` ==
+### To build `Perforce API`
 
-1. Run `jam -sOSVER=120 -sCLANGVER=14.0.0 -sTYPE=pic -sUSE_EXTENSIONS=0 -sOSPLAT=U -sPRODUCTION=1 -sSSLLIBDIR=/tmp/openssl-universal/lib/ -sSSLINCDIR=/tmp/openssl-universal/include/ p4api.tar` (for Release build)
+1. Go to source dir - `cd /code/p4-cli-api-25.2/src`
 
-== To build `P4 CLI` ==
+2. Run `jam -sOSVER=120 -sCLANGVER=14.0.0 -sTYPE=pic -sUSE_EXTENSIONS=0 -sOSPLAT=U -sPRODUCTION=1 -sSSLLIBDIR=/tmp/openssl-universal/lib/ -sSSLINCDIR=/tmp/openssl-universal/include/ p4api.tar` for Release build
 
-1. Run `jam -sOSVER=120 -sCLANGVER=14.0.0 -sTYPE=pic -sUSE_EXTENSIONS=0 -sOSPLAT=U -sSSLLIBDIR=/tmp/openssl-universal/lib/ -sSSLINCDIR=/tmp/openssl-universal/include/ p4` (for Release build)
+3. Run `jam -sOSVER=120 -sCLANGVER=14.0.0 -sTYPE=gpic -sUSE_EXTENSIONS=0 -sOSPLAT=U -sPRODUCTION=1 -sSSLLIBDIR=/tmp/openssl-universal/lib/ -sSSLINCDIR=/tmp/openssl-universal/include/ p4api.tar` for Debug build
 
-== To build `Perforce API` ==
+4. Create P4 artifact for GitHub release
+- `cd ..`
+- `mkdir -p artifact/lib/release`
+- `mkdir -p artifact/lib/debug`
+- `mkdir -p artifact/include`
+- `cp p4-bin/bin.macosx120u/pic/*.a artifact/lib/release`
+- `cp p4-bin/bin.macosx120u/gpic/*.a artifact/lib/debug`
+- `cp -R p4-bin/bin.macosx120u/gpic/p4api-2025.2.3086021/include/ artifact/include/`
+- `cd artifact`
+- `tar -a -cf p4api-2025.2.3086021-static-macosx120u.tar.gz *`
 
-1. Run `jam -sOSVER=26 -sGCCVER=11.4.0 -sSMARTHEAP=0 -sTYPE=pic -sMALLOC_OVERRIDE=0 -sUSE_EXTENSIONS=0 -sSSLLIBDIR=/usr/lib/x86_64-linux-gnu/ -sSSLINCDIR=/usr/include/ -sPRODUCTION=1 p4api.tar` (for Release build)
+### To build `P4 CLI`
 
-***Windows***
+1. Run `jam -sOSVER=120 -sCLANGVER=14.0.0 -sTYPE=pic -sUSE_EXTENSIONS=0 -sOSPLAT=U -sSSLLIBDIR=/tmp/openssl-universal/lib/ -sSSLINCDIR=/tmp/openssl-universal/include/ p4` for Release build
 
-1. Run `c:\Program Files\Microsoft Visual Studio\18\Insiders\VC\Auxiliary\Build\vcvars64.bat`
+## Windows
 
-== To build `Perforce API` ==
+Tested on Windows 11 with VS 2026 toolchain
 
-1. Run `jam -sMSVSVER=18 -sSMARTHEAP=0 -sTYPE=pic -sMALLOC_OVERRIDE=0 -sUSE_EXTENSIONS=0 -sUSE_WILDARGS=no -sSSLLIBDIR=/usr/lib/x86_64-linux-gnu/ -sSSLINCDIR="c:\code\OpenSSL\openssl\include" -sPRODUCTION=1 p4api.tar` (for Release build)
+### Preparations
 
-2. Run `jam -sMSVSVER=18 -sSMARTHEAP=0 -sTYPE=picg -sMALLOC_OVERRIDE=0 -sUSE_EXTENSIONS=0 -sUSE_WILDARGS=no -sSSLLIBDIR=/usr/lib/x86_64-linux-gnu/ -sSSLINCDIR="c:\code\OpenSSL\openssl\include" -sPRODUCTION=1 p4api.tar` (for Debug build)
+1. Setup console for MSVC environment, e.g. `c:\Program Files\Microsoft Visual Studio\18\Insiders\VC\Auxiliary\Build\vcvars64.bat`
 
-== To build `P4 CLI` ==
+2. Get `jam` - if you can't find precompiled version, you can build it from source:
+- Download source from `https://swarm.workshop.perforce.com/files/guest/perforce_software/jam/src` and unpack to local folder, e.g. `C:\code\jam`
+- Run `cl /nologo /DNT /D_WIN32 /Fejam.exe *.c advapi32.lib` in the folder (from console with MSVC environment). If you're seeing link issues, you may need to remove `mkjambase.c` from the folder
+- Make sure `jam` binary is in PATH
 
-1. Build OpenSSL for Windows
+3. Get `perl` (e.g. _Strawberry_) and add it to PATH
 
+4. Get `nasm` and add it to PATH
 
-2. Run `jam -sMSVSVER=18 -sSMARTHEAP=0 -sTYPE=pic -sMALLOC_OVERRIDE=0 -sUSE_EXTENSIONS=0 -sUSE_WILDARGS=no -sSSLLIBDIR=c:\code\OpenSSL\openssl -sSSLINCDIR="c:\code\OpenSSL\openssl\include" p4` (for Release build)
+5. Get `git` and add it to PATH
+
+### To build `OpenSSL`
+
+1. Get OpenSSL source & switch to 3.5.9
+- `git clone https://github.com/openssl/openssl.git C:\code\openssl`
+- `cd C:\code\openssl`
+- `git checkout tags/openssl-3.5.9 -b build-3.5.9`
+
+2. Build OpenSSL in Release configuration
+- Configure - `perl Configure VC-WIN64A no-shared`
+- Build it - `nmake`
+- Install it - `nmake install`
+
+3. Take relevant files from installation folder to artifact for GitHub release
+- `mkdir C:\code\openssl\artifact\lib\Release`
+- `copy "C:\Program Files\OpenSSL\lib\*.lib" C:\code\openssl\artifact\lib\Release`
+- `xcopy /EIY "C:\Program Files\OpenSSL\include" C:\code\openssl\artifact\include`
+
+4. Build OpenSSL in Debug configuration
+- Clean previous build - `nmake distclean`
+- Configure - `perl Configure debug-VC-WIN64A no-shared`
+- Build it - `nmake`
+- Install it - `nmake install`
+
+5. Take relevant files from installation folder to artifact for GitHub release
+- `mkdir C:\code\openssl\artifact\lib\Debug`
+- `copy "C:\Program Files\OpenSSL\lib\*.lib" C:\code\openssl\artifact\lib\Debug`
+
+6. Finish the GitHub release artifact
+- `cd C:\code\openssl`
+- `tar -z -cf openssl-3.5.9-static-windows-x86_64.tar.gz -C artifact *`
+
+### To build `Perforce API`
+
+1. Go to source dir - `cd C:\code\p4-cli-api-25.2\src`
+
+2. Run `jam -sMSVSVER=18 -sSMARTHEAP=0 -sTYPE=pic -sMALLOC_OVERRIDE=0 -sUSE_EXTENSIONS=0 -sUSE_WILDARGS=no -sSSLLIBDIR="C:\code\OpenSSL\artifact\lib" -sSSLINCDIR="C:\code\OpenSSL\artifact\include" -sPRODUCTION=1 p4api.tar` for Release build
+
+3. Run `jam -sMSVSVER=18 -sSMARTHEAP=0 -sTYPE=picg -sMALLOC_OVERRIDE=0 -sUSE_EXTENSIONS=0 -sUSE_WILDARGS=no -sSSLLIBDIR="C:\code\OpenSSL\artifact\lib" -sSSLINCDIR="C:\code\OpenSSL\artifact\include" -sPRODUCTION=1 p4api.tar` for Debug build
+
+4. Create P4 artifact for GitHub release
+- `cd ..`
+- `mkdir artifact\lib\release`
+- `mkdir artifact\lib\debug`
+- `mkdir artifact\include`
+- `copy p4-bin\bin.ntx64\pic\*.lib artifact\lib\release`
+- `copy p4-bin\bin.ntx64\picg\*.lib artifact\lib\debug`
+- `xcopy /EIY p4-bin\bin.ntx64\pic\p4api-2025.2.3086021-static_pic\include\ artifact\include`
+- `tar -z -cf p4api-2025.2.3086021-static-windows-x86_64.tar.gz -C artifact *`
+
+### To build `P4 CLI`
+
+1. Run `jam -sMSVSVER=18 -sSMARTHEAP=0 -sTYPE=pic -sMALLOC_OVERRIDE=0 -sUSE_EXTENSIONS=0 -sUSE_WILDARGS=no -sSSLLIBDIR="C:\code\OpenSSL\artifact\lib" -sSSLINCDIR="C:\code\OpenSSL\artifact\include" p4` for Release build
