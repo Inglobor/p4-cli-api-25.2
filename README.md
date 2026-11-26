@@ -1,3 +1,14 @@
+# P4 CLI/API 25.2 with select() fix etc.
+
+This is a source code for Perforce command line and API, with a couple of small tweaks:
+- Socket handling: `select()` usage replaced with `poll()` to avoid hitting issues with more than 1k descriptors
+- Header visibility: compression header exposed so code linking this API statically can also tinker with content compression
+
+See HOW-TO-BUILD.md for more information on how to build the source on Windows, Mac, and Linux. 
+
+Original Perforce README follows
+---
+
 # Perforce Open Source Command Line and API
 
 This is the source code for the Perforce command line and API. See LICENSE
