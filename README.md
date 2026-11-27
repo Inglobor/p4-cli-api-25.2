@@ -1,6 +1,6 @@
 # P4 CLI/API 25.2 with select() fix etc.
 
-This is a source code for Perforce command line and API, with a couple of small tweaks:
+This is a source code for Perforce command line and API as of [25.2](ftps://ftp.perforce.com/perforce/r25.2/bin.tools/p4source.tgz), with a couple of small tweaks:
 - Socket handling: `select()` usage replaced with `poll()` to avoid hitting issues with more than 1k descriptors
 - Header visibility: compression header exposed so code linking this API statically can also tinker with content compression
 
